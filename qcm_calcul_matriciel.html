@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QCM – Calcul matriciel</title>
+<style>
+:root{--bg:#f3f6f9;--grid:#dbe4ec;--ink:#14263a;--mute:#5b6b7b;--card:#fff;--line:#c5d1dc;--accent:#1d4e89;--ok:#1b7a4b;--okbg:#e4f4ea;--ko:#b3261e;--kobg:#fbe9e7}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1822;--grid:#1a2735;--ink:#e6edf4;--mute:#93a4b5;--card:#16222f;--line:#2c3e50;--accent:#7db3ec;--ok:#6fd49c;--okbg:#14301f;--ko:#ff8a80;--kobg:#3a1b19}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background-color:var(--bg);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px;color:var(--ink);font:17px/1.55 Georgia,"Iowan Old Style",serif;min-height:100vh;padding:24px 16px 48px}
+main{max-width:680px;margin:0 auto}
+h1{font-size:1.5rem;margin:0 0 4px;letter-spacing:-.01em}
+.sub{color:var(--mute);margin:0 0 18px;font-size:.95rem}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:6px}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+.count{color:var(--mute);font-size:.9rem;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px}
+.q{font-size:1.2rem;margin:0 0 18px;line-height:1.45}
+.opts{display:grid;gap:10px}
+.opt{font:inherit;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.95rem;text-align:left;color:var(--ink);background:transparent;border:1.5px solid var(--line);border-radius:8px;padding:11px 14px;cursor:pointer;line-height:1.4}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:focus-visible,.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.opt:disabled{cursor:default}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}
+.opt.ko{border-color:var(--ko);background:var(--kobg)}
+.fb{margin-top:16px;padding:12px 14px;border-radius:8px;font-size:.97rem}
+.fb.ok{background:var(--okbg)}.fb.ko{background:var(--kobg)}
+.fb b{display:block;margin-bottom:2px}
+.btn{font:inherit;font-weight:bold;color:#fff;background:var(--accent);border:0;border-radius:8px;padding:11px 20px;cursor:pointer;margin-top:18px}
+@media (prefers-color-scheme:dark){.btn{color:#0f1822}}
+.score{font-size:2.6rem;margin:0}
+.rev{margin:18px 0 0;padding:0;list-style:none;display:grid;gap:10px}
+.rev li{border-left:3px solid var(--ko);padding:2px 0 2px 12px;font-size:.95rem}
+.rev code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9rem}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<h1>Calcul matriciel</h1>
+<p class="sub">Vecteurs, opérations, indexation et fonctions (syntaxe MATLAB/Octave)</p>
+<div id="quiz">
+  <div class="bar"><i id="pb"></i></div>
+  <div class="count" id="cnt"></div>
+  <section class="card">
+    <p class="q" id="q"></p>
+    <div class="opts" id="opts"></div>
+    <div class="fb" id="fb" hidden></div>
+    <button class="btn" id="next" hidden></button>
+  </section>
+</div>
+<section class="card" id="end" hidden>
+  <p class="score" id="sc"></p>
+  <p id="msg"></p>
+  <ul class="rev" id="rev"></ul>
+  <button class="btn" id="again">Recommencer</button>
+</section>
+</main>
+<script>
+const Q=[
+["Quelle commande crée le vecteur ligne [1 2 3] ?",["v = [1;2;3]","v = [1 2 3]","v = (1,2,3)","v = {1,2,3}"],1,"Les crochets avec des espaces (ou des virgules) créent un vecteur ligne. Le point-virgule crée un vecteur colonne."],
+["Que donne x = 0:2:10 ?",["[2 4 6 8 10]","[0 2 4 6 8]","[0 2 4 6 8 10]","[0 1 2 3 ... 10]"],2,"La syntaxe début:pas:fin inclut le début et la fin si elle est atteinte : 0, 2, 4, 6, 8, 10."],
+["Que renvoie linspace(0,1,5) ?",["[0 0.2 0.4 0.6 0.8]","[0.25 0.5 0.75 1]","[0 0.1 0.2 ... 1]","[0 0.25 0.5 0.75 1]"],3,"linspace(a,b,n) génère n points équidistants entre a et b inclus. Ici 5 points, pas de 0.25."],
+["Que renvoie size(A) pour A = [1 2 3; 4 5 6] ?",["[3 2]","[2 3]","6","[1 6]"],1,"A a 2 lignes et 3 colonnes, donc size(A) = [2 3]."],
+["Avec A = [1 2; 3 4] et B = [5 6; 7 8], que vaut A.*B ?",["[19 22; 43 50]","[5 12; 21 32]","[6 8; 10 12]","Une erreur"],1,".* est le produit élément par élément : 1·5=5, 2·6=12, 3·7=21, 4·8=32."],
+["Avec les mêmes A = [1 2; 3 4] et B = [5 6; 7 8], que vaut A*B (produit matriciel) ?",["[19 22; 43 50]","[5 12; 21 32]","[23 34; 31 46]","[6 8; 10 12]"],0,"Ligne par colonne : 1·5+2·7=19, 1·6+2·8=22, 3·5+4·7=43, 3·6+4·8=50."],
+["Quelle est la taille de A' si A = [1 2 3; 4 5 6] ?",["2×3","3×3","3×2","1×6"],2,"L'apostrophe donne la transposée : les lignes deviennent des colonnes, donc 3×2."],
+["Que vaut det([1 2; 3 4]) ?",["-2","2","10","-10"],0,"det = 1·4 − 2·3 = −2."],
+["À quelle condition la matrice carrée A est-elle inversible (inv(A) existe) ?",["Si tous ses éléments sont positifs","Si elle est symétrique","Si elle contient au moins un zéro","Si det(A) ≠ 0"],3,"Une matrice carrée est inversible si et seulement si son déterminant est non nul."],
+["Soit A = [1 2 3; 4 5 6; 7 8 9]. Que vaut A(2,3) ?",["6","8","4","2"],0,"A(i,j) désigne la ligne i, colonne j : ligne 2, colonne 3 = 6."],
+["Avec la même matrice A (3×3 de 1 à 9), que renvoie A(:,2) ?",["[4 5 6]","[2 5 8]  (ligne)","[2; 5; 8]  (colonne)","5"],2,"Le deux-points seul sélectionne toutes les lignes ; on obtient la 2ᵉ colonne sous forme de vecteur colonne."],
+["Que renvoie A(1,:) pour la même matrice A ?",["[1 2 3]","[1; 4; 7]","1","[1 4 7]"],0,"A(1,:) sélectionne toute la première ligne."],
+["Soit A = [1 2; 3 4]. Après l'instruction A(1,2) = 10, que vaut A ?",["[10 2; 3 4]","[1 2; 10 4]","[1 10; 3 4]","[1 2; 3 10]"],2,"A(1,2) est l'élément ligne 1, colonne 2 (valeur 2), remplacé par 10."],
+["Que désigne A(end,end) ?",["Le dernier élément de la dernière ligne (coin en bas à droite)","Le premier élément de la matrice","La dernière ligne entière","Une erreur de syntaxe"],0,"end représente le dernier indice de la dimension considérée ; A(end,end) est l'élément en bas à droite."],
+["Quel est l'effet de A(:,1) = [] ?",["Remplit la 1ʳᵉ colonne de zéros","Supprime la 1ʳᵉ colonne de A","Supprime la 1ʳᵉ ligne de A","Vide toute la matrice"],1,"Affecter [] à une sélection supprime cette sélection : ici, la première colonne."],
+["Avec A = [2 1; 3 4], que renvoie trace(A) ?",["10","6","[2 4]","4"],1,"trace(A) est la somme des éléments de la diagonale principale : 2 + 4 = 6. La somme de tous les éléments serait sum(A(:)) = 10, et [2 4] correspond à diag(A)."],
+["Que génère la fonction magic(3) ?",["Une matrice 3×3 de nombres aléatoires","Une matrice 3×3 contenant les entiers de 1 à 9, dont toutes les lignes, colonnes et diagonales ont la même somme (15)","La matrice identité 3×3","Une matrice 3×3 contenant les entiers de 1 à 9 rangés dans l'ordre croissant"],1,"magic(n) renvoie un carré magique n×n contenant les entiers de 1 à n², dont les sommes de chaque ligne, de chaque colonne et des deux diagonales sont identiques. Pour n = 3 cette somme vaut 15 : magic(3) = [8 1 6; 3 5 7; 4 9 2]."],
+["Que renvoie sum(A) pour A = [1 2; 3 4] ?",["10","[3 7]","[4 6]","[1 2; 3 4]"],2,"Pour une matrice, sum agit par défaut sur chaque colonne : 1+3=4 et 2+4=6. Pour la somme totale : sum(A(:))."],
+["Avec A = [1 2; 3 4], que vaut A.^2 ?",["[1 4; 9 16]","[7 10; 15 22]","[2 4; 6 8]","[1 2; 3 4]"],0,".^ élève chaque élément au carré. A^2 (sans point) donnerait le produit matriciel [7 10; 15 22]."],
+["Avec A = [3 1; 2 5], que renvoie max(A) ?",["5","[3 5]","[3; 5]","[2 1]"],1,"max travaille colonne par colonne : max(3,2)=3 et max(1,5)=5. Pour le maximum global : max(A(:))."]
+];
+const $=id=>document.getElementById(id);
+let i=0,score=0,wrong=[];
+function show(){
+  const [p,o]=Q[i];
+  $('cnt').textContent="Question "+(i+1)+" sur "+Q.length;
+  $('pb').style.width=(i/Q.length*100)+"%";
+  $('q').textContent=p;
+  $('fb').hidden=true;$('next').hidden=true;
+  const box=$('opts');box.textContent="";
+  o.forEach((t,k)=>{
+    const b=document.createElement('button');
+    b.className="opt";b.textContent=t;
+    b.onclick=()=>answer(k);
+    box.appendChild(b);
+  });
+}
+function answer(k){
+  const [p,o,c,e]=Q[i];
+  const bs=$('opts').children;
+  for(let j=0;j<bs.length;j++){bs[j].disabled=true;}
+  bs[c].classList.add('ok');
+  const good=k===c;
+  if(good){score++;}else{bs[k].classList.add('ko');wrong.push(i);}
+  const fb=$('fb');
+  fb.className="fb "+(good?"ok":"ko");
+  fb.textContent="";
+  const b=document.createElement('b');
+  b.textContent=good?"Bonne réponse.":"Mauvaise réponse.";
+  fb.appendChild(b);
+  fb.appendChild(document.createTextNode(e));
+  fb.hidden=false;
+  const n=$('next');
+  n.textContent=i<Q.length-1?"Question suivante":"Voir mon score";
+  n.hidden=false;n.focus();
+}
+$('next').onclick=()=>{i++;if(i<Q.length){show();}else{finish();}};
+function finish(){
+  $('quiz').hidden=true;$('end').hidden=false;
+  $('sc').textContent=score+" / "+Q.length;
+  $('msg').textContent=wrong.length?"Questions à revoir :":"Sans faute, bravo !";
+  const ul=$('rev');ul.textContent="";
+  wrong.forEach(n=>{
+    const li=document.createElement('li');
+    li.appendChild(document.createTextNode((n+1)+". "+Q[n][0]+" Réponse : "));
+    const c=document.createElement('code');c.textContent=Q[n][1][Q[n][2]];
+    li.appendChild(c);ul.appendChild(li);
+  });
+}
+$('again').onclick=()=>{i=0;score=0;wrong=[];$('end').hidden=true;$('quiz').hidden=false;show();};
+show();
+</script>
+</body>
+</html>
