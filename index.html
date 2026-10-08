@@ -115,7 +115,7 @@ const Q=[
 ["À quelle condition la matrice carrée A est-elle inversible (inv(A) existe) ?",["Si tous ses éléments sont positifs","Si elle est symétrique","Si elle contient au moins un zéro","Si det(A) ≠ 0"],3,"Une matrice carrée est inversible si et seulement si son déterminant est non nul."],
 ["Soit A = [1 2 3; 4 5 6; 7 8 9]. Que vaut A(2,3) ?",["6","8","4","2"],0,"A(i,j) désigne la ligne i, colonne j : ligne 2, colonne 3 = 6."],
 ["Avec la même matrice A (3×3 de 1 à 9), que renvoie A(:,2) ?",["[4 5 6]","[2 5 8]  (ligne)","[2; 5; 8]  (colonne)","5"],2,"Le deux-points seul sélectionne toutes les lignes ; on obtient la 2ᵉ colonne sous forme de vecteur colonne."],
-["Que renvoie A(1,:) pour la même matrice A ?",["[1 2 3]","[1; 4; 7]","1","[1 4 7]"],0,"A(1,:) sélectionne toute la première ligne."],
+["Que renvoie A(1,:) pour la même matrice A (3×3 de 1 à 9) ?",["[1 2 3]","[1; 4; 7]","1","[1 4 7]"],0,"A(1,:) sélectionne toute la première ligne."],
 ["Soit A = [1 2; 3 4]. Après l'instruction A(1,2) = 10, que vaut A ?",["[10 2; 3 4]","[1 2; 10 4]","[1 10; 3 4]","[1 2; 3 10]"],2,"A(1,2) est l'élément ligne 1, colonne 2 (valeur 2), remplacé par 10."],
 ["Que désigne A(end,end) ?",["Le dernier élément de la dernière ligne (coin en bas à droite)","Le premier élément de la matrice","La dernière ligne entière","Une erreur de syntaxe"],0,"end représente le dernier indice de la dimension considérée ; A(end,end) est l'élément en bas à droite."],
 ["Quel est l'effet de A(:,1) = [] ?",["Remplit la 1ʳᵉ colonne de zéros","Supprime la 1ʳᵉ colonne de A","Supprime la 1ʳᵉ ligne de A","Vide toute la matrice"],1,"Affecter [] à une sélection supprime cette sélection : ici, la première colonne."],
